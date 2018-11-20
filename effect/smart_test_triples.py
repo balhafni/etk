@@ -96,83 +96,94 @@ class RegexETKModule(ETKModule):
             # print(log)
             #TODO, add the message id as a URI in the triple and clean the data as Pedro said!
 
+            #let's create triples of only the log lines that do have a message id
+            if mid:
+                triple = Subject(URI("M"+str(mid)))
+                triple.add_property(URI("rdf:type"), URI("LogData"))
 
-            triple = Subject(URI("LogLine"+str(count)))
-            triple.add_property(URI("rdf:type"), URI("LogData"))
+                # log_line = Subject(BNode())
+                # log_line.add_property(URI("rdf:type"), URI("LogText"))
+                # log_line.add_property(URI("text"), Literal(document.cdr_document.get("log_text")))
+                # triple.add_property(URI("text"), log_line)
+                triple.add_property(URI("text"), Literal(document.cdr_document.get("log_text")))
 
-            log_line = Subject(BNode())
-            log_line.add_property(URI("rdf:type"), URI("LogText"))
-            log_line.add_property(URI("text"), Literal(document.cdr_document.get("log_text")))
-            triple.add_property(URI("text"), log_line)
+                # ip = Subject(BNode())
+                # ip.add_property(URI("rdf:type"), URI("IPAddress"))
+                # ip.add_property(URI("ip"), Literal(document.cdr_document.get("ip")))
+                # triple.add_property(URI("IP"),ip)
+                triple.add_property(URI("IP"), Literal(document.cdr_document.get("ip")))
 
-            ip = Subject(BNode())
-            ip.add_property(URI("rdf:type"), URI("IPAddress"))
-            ip.add_property(URI("ip"), Literal(document.cdr_document.get("ip")))
-            triple.add_property(URI("IP"),ip)
+                # date = Subject(BNode())
+                # date.add_property(URI("rdf:type"), URI("Date"))
+                #let's format the date into ISO before adding it
+                unformatted_date = document.cdr_document.get('date', 0)
+                if unformatted_date != 0:
+                    log_date = unformatted_date.split('.')
+                    iso_date = self.date_extractor.extract('{}-{}-{}'.format(log_date[2], log_date[1], log_date[0]))
+                    # print(extractables)
+                    # date.add_property(URI("date"), Literal(document.cdr_document.get("date")))
+                    # date.add_property(URI("date"), Literal(iso_date[0].value +"T"+document.cdr_document.get("time")))
+                    # triple.add_property(URI("date"), date)
+                    triple.add_property(URI("date"), Literal(iso_date[0].value +"T"+document.cdr_document.get("time")))
 
-            date = Subject(BNode())
-            date.add_property(URI("rdf:type"), URI("Date"))
-            #let's format the date into ISO before adding it
-            unformatted_date = document.cdr_document.get('date', 0)
-            if unformatted_date != 0:
-                log_date = unformatted_date.split('.')
-                iso_date = self.date_extractor.extract('{}-{}-{}'.format(log_date[2], log_date[1], log_date[0]))
-                # print(extractables)
-                # date.add_property(URI("date"), Literal(document.cdr_document.get("date")))
-                date.add_property(URI("date"), Literal(iso_date[0].value +"T"+document.cdr_document.get("time")))
-                triple.add_property(URI("date"), date)
+                # time = Subject(BNode())
+                # time.add_property(URI("rdf:type"), URI("Time"))
+                # time.add_property(URI("time"), Literal(document.cdr_document.get("time")))
+                # triple.add_property(URI("time"), time)
+                # triple.add_property(URI("time"), time)
 
-            time = Subject(BNode())
-            time.add_property(URI("rdf:type"), URI("Time"))
-            time.add_property(URI("time"), Literal(document.cdr_document.get("time")))
-            triple.add_property(URI("time"), time)
+                # log_level = Subject(BNode())
+                # log_level.add_property(URI("rdf:type"), URI("LogLevel"))
+                # log_level.add_property(URI("level"), Literal(document.cdr_document.get("log_level")))
+                # triple.add_property(URI("level"), log_level)
+                triple.add_property(URI("level"),Literal(document.cdr_document.get("log_level")))
 
-            log_level = Subject(BNode())
-            log_level.add_property(URI("rdf:type"), URI("LogLevel"))
-            log_level.add_property(URI("level"), Literal(document.cdr_document.get("log_level")))
-            triple.add_property(URI("level"), log_level)
+                if document.cdr_document.get("mid"):
+                    # msg_id = Subject(BNode())
+                    # msg_id.add_property(URI("rdf:type"), URI("MID"))
+                    # msg_id.add_property(URI("message_id"), Literal(document.cdr_document.get("mid")))
+                    # triple.add_property(URI("message_id"), msg_id)
+                    triple.add_property(URI("message_id"), Literal(document.cdr_document.get("mid")))
 
-            if document.cdr_document.get("mid"):
-                msg_id = Subject(BNode())
-                msg_id.add_property(URI("rdf:type"), URI("MID"))
-                msg_id.add_property(URI("message_id"), Literal(document.cdr_document.get("mid")))
-                triple.add_property(URI("message_id"), msg_id)
+                if document.cdr_document.get("subject"):
+                    # subject = Subject(BNode())
+                    # subject.add_property(URI("rdf:type"), URI("Subject"))
+                    # subject.add_property(URI("subject"), Literal(document.cdr_document.get("subject")))
+                    # triple.add_property(URI("subject"), subject)
+                    triple.add_property(URI("subject"),  Literal(document.cdr_document.get("subject")))
 
-            if document.cdr_document.get("subject"):
-                subject = Subject(BNode())
-                subject.add_property(URI("rdf:type"), URI("Subject"))
-                subject.add_property(URI("subject"), Literal(document.cdr_document.get("subject")))
-                triple.add_property(URI("subject"), subject)
+                if document.cdr_document.get("spam_engine"):
+                    # spam_engine = Subject(BNode())
+                    # spam_engine.add_property(URI("rdf:type"), URI("SpamEngine"))
+                    # spam_engine.add_property(URI("engine"), Literal(document.cdr_document.get("spam_engine")))
+                    # triple.add_property(URI("engine"), spam_engine)
+                    triple.add_property(URI("engine"), Literal(document.cdr_document.get("spam_engine")))
 
-            if document.cdr_document.get("spam_engine"):
-                spam_engine = Subject(BNode())
-                spam_engine.add_property(URI("rdf:type"), URI("SpamEngine"))
-                spam_engine.add_property(URI("engine"), Literal(document.cdr_document.get("spam_engine")))
-                triple.add_property(URI("engine"), spam_engine)
+                if document.cdr_document.get("spam_results"):
+                    # spam_result = Subject(BNode())
+                    # spam_result.add_property(URI("rdf:type"), URI("SpamFilterResult"))
+                    # spam_result.add_property(URI("result"), Literal(document.cdr_document.get("spam_results")))
+                    # triple.add_property(URI("result"), spam_result)
+                    triple.add_property(URI("result"), Literal(document.cdr_document.get("spam_results")))
 
-            if document.cdr_document.get("spam_results"):
-                spam_result = Subject(BNode())
-                spam_result.add_property(URI("rdf:type"), URI("SpamFilterResult"))
-                spam_result.add_property(URI("result"), Literal(document.cdr_document.get("spam_results")))
-                triple.add_property(URI("result"), spam_result)
-
-            if document.cdr_document.get("attachment"):
-                attachment = Subject(BNode())
-                attachment.add_property(URI("rdf:type"), URI("Attachment"))
-                attachment.add_property(URI("attached_file"), Literal(document.cdr_document.get("attachment")))
-                triple.add_property(URI("attached_file"), attachment)
+                if document.cdr_document.get("attachment"):
+                    # attachment = Subject(BNode())
+                    # attachment.add_property(URI("rdf:type"), URI("Attachment"))
+                    # attachment.add_property(URI("attached_file"), Literal(document.cdr_document.get("attachment")))
+                    # triple.add_property(URI("attached_file"), attachment)
+                    triple.add_property(URI("attached_file"), Literal(document.cdr_document.get("attachment")))
 
 
-            # developers = doc.extract(self.name_extractor, d)
-            # p.store(developers, "members")
-            # for developer in developers:
-            #     developer_t = Subject(BNode())
-            #     developer_t.add_property(URI("rdf:type"), URI("Developer"))
-            #     developer_t.add_property(URI("name"), Literal(developer.value))
-            #     triple.add_property(URI("developer"), developer_t)
-            count = count + 1
-            doc.kg.add_subject(triple)
-            # break
+                # developers = doc.extract(self.name_extractor, d)
+                # p.store(developers, "members")
+                # for developer in developers:
+                #     developer_t = Subject(BNode())
+                #     developer_t.add_property(URI("rdf:type"), URI("Developer"))
+                #     developer_t.add_property(URI("name"), Literal(developer.value))
+                #     triple.add_property(URI("developer"), developer_t)
+                count = count + 1
+                doc.kg.add_subject(triple)
+                # break
 
         return list()
 
